@@ -1,11 +1,22 @@
--- NEXO Performance, grupo 50. PROPUESTA PARA REVISAR, NO APLICADA.
--- Traducción del modelo docs/modelo-er.png: seis tablas, 34 campos.
--- Referencia para una base VACÍA; el proyecto actual ya contiene estas tablas.
--- No ejecutar en Supabase real sin aprobación expresa del grupo.
--- Después se revisa 002_seguridad.sql. No incluye datos ni claves de acceso.
--- Las funciones validan las reglas del modelo y permiten guardar datos juntos.
+-- NEXO Performance, grupo 50. Modelo aprobado: seis tablas y 34 campos.
+-- Instalación inicial o reconocimiento de la misma estructura ya existente.
+-- Aprobación del representante del grupo: «terminalo», 31/10/2026.
+-- Si están las seis tablas, verifica su estructura y conserva datos y funciones.
+-- Si hay una estructura parcial o distinta, aborta; no intenta corregirla a ciegas.
+-- Las huellas siguientes corresponden SOLO A METADATOS, nunca a datos de filas.
+-- No contiene seeds, secretos, borrados ni cambios del catálogo privado.
 BEGIN;
+SET LOCAL search_path = public, pg_catalog;
 
+DO $nexo_modelo$
+DECLARE presentes integer; actual jsonb;
+BEGIN
+ SELECT count(*) INTO presentes
+ FROM information_schema.tables
+ WHERE table_schema='public' AND table_type='BASE TABLE'
+ AND table_name IN ('deportista','test','protocolo','evaluacion','metrica','medicion');
+ IF presentes=0 THEN
+  EXECUTE $nexo_instalacion$
 CREATE TABLE public.deportista (
  id_deportista text PRIMARY KEY,
  alias text NOT NULL CHECK (length(btrim(alias)) BETWEEN 1 AND 160),
@@ -281,6 +292,39 @@ BEGIN
  RETURN public.nexo_ec_estado();
 END;
 $$;
+  $nexo_instalacion$;
+ ELSIF presentes<>6 THEN
+  RAISE EXCEPTION 'NEXO: Estructura parcial. No se modifican tablas existentes.' USING ERRCODE='23514';
+ END IF;
+
+ -- Comprueba campos, restricciones, índices, funciones y triggers completos.
+ SELECT jsonb_build_object(
+ 'columns',(SELECT jsonb_agg(to_jsonb(x) ORDER BY table_name,ordinal_position) FROM (SELECT table_name,column_name,ordinal_position,data_type,udt_name,is_nullable,column_default FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('deportista','test','protocolo','evaluacion','metrica','medicion')) x),
+ 'constraints',(SELECT jsonb_agg(jsonb_build_object('table_name',c.conrelid::regclass::text,'name',c.conname,'type',c.contype,'deferrable',c.condeferrable,'deferred',c.condeferred,'definition',pg_get_constraintdef(c.oid)) ORDER BY c.conrelid::regclass::text,c.conname) FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname='public' AND c.conrelid::regclass::text IN ('deportista','test','protocolo','evaluacion','metrica','medicion')),
+ 'indexes',(SELECT jsonb_agg(to_jsonb(x) ORDER BY tablename,indexname) FROM (SELECT tablename,indexname,indexdef FROM pg_indexes WHERE schemaname='public' AND tablename IN ('deportista','test','protocolo','evaluacion','metrica','medicion')) x),
+ 'functions',(SELECT jsonb_agg(jsonb_build_object('name',p.proname,'arguments',pg_get_function_identity_arguments(p.oid),'definition',pg_get_functiondef(p.oid),'security_definer',p.prosecdef,'config',p.proconfig) ORDER BY p.proname) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname IN ('nexo_ec_estado','nexo_ec_mutar','nexo_ec_assert_integridad','nexo_ec_comprobar_diferido','nexo_ec_validar_evaluacion','nexo_ec_validar_medicion','nexo_ec_preservar_protocolo','nexo_ec_preservar_metrica')),
+ 'triggers',(SELECT jsonb_agg(jsonb_build_object('table_name',t.tgrelid::regclass::text,'name',t.tgname,'definition',pg_get_triggerdef(t.oid),'enabled',t.tgenabled) ORDER BY t.tgrelid::regclass::text,t.tgname) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname IN ('deportista','test','protocolo','evaluacion','metrica','medicion') AND NOT t.tgisinternal),
+ 'policies',(SELECT jsonb_agg(to_jsonb(x) ORDER BY tablename,policyname) FROM (SELECT tablename,policyname,permissive,roles,cmd,qual,with_check FROM pg_policies WHERE schemaname='public' AND tablename IN ('deportista','test','protocolo','evaluacion','metrica','medicion'))x),
+ 'table_grants',(SELECT jsonb_agg(to_jsonb(x) ORDER BY table_name,grantee,privilege_type) FROM (SELECT table_name,grantee,privilege_type FROM information_schema.table_privileges WHERE table_schema='public' AND grantee IN ('anon','authenticated','service_role','PUBLIC') AND table_name IN ('deportista','test','protocolo','evaluacion','metrica','medicion'))x),
+ 'function_grants',(SELECT jsonb_agg(to_jsonb(x) ORDER BY routine_name,grantee) FROM (SELECT routine_name,grantee,privilege_type FROM information_schema.routine_privileges WHERE routine_schema='public' AND routine_name LIKE 'nexo_ec_%' AND grantee IN ('anon','authenticated','service_role','PUBLIC'))x)
+) INTO actual;
+ IF md5((actual->'columns')::text) IS DISTINCT FROM 'c5b3b2b65475e8c6042649beeaa6061d' THEN
+  RAISE EXCEPTION 'NEXO: El esquema existente difiere en columns. Revisa una migración específica; no se recrean tablas.' USING ERRCODE='23514';
+ END IF;
+ IF md5((actual->'constraints')::text) IS DISTINCT FROM '01539ed3b555cd04218bb5acb09c8328' THEN
+  RAISE EXCEPTION 'NEXO: El esquema existente difiere en constraints. Revisa una migración específica; no se recrean tablas.' USING ERRCODE='23514';
+ END IF;
+ IF md5((actual->'indexes')::text) IS DISTINCT FROM 'cd0cc9d0dc20b71c696c8db0d0cd48a2' THEN
+  RAISE EXCEPTION 'NEXO: El esquema existente difiere en indexes. Revisa una migración específica; no se recrean tablas.' USING ERRCODE='23514';
+ END IF;
+ IF md5((actual->'functions')::text) IS DISTINCT FROM '26b214b0c7b31ec4ece555bcdb43e728' THEN
+  RAISE EXCEPTION 'NEXO: El esquema existente difiere en functions. Revisa una migración específica; no se recrean tablas.' USING ERRCODE='23514';
+ END IF;
+ IF md5((actual->'triggers')::text) IS DISTINCT FROM 'df0037359ab235a6afb8fade85635153' THEN
+  RAISE EXCEPTION 'NEXO: El esquema existente difiere en triggers. Revisa una migración específica; no se recrean tablas.' USING ERRCODE='23514';
+ END IF;
+END;
+$nexo_modelo$;
 
 -- Protección inicial: no se abre acceso entre 001 y 002.
 ALTER TABLE public.deportista ENABLE ROW LEVEL SECURITY;
@@ -292,4 +336,6 @@ ALTER TABLE public.medicion ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.deportista,public.test,public.protocolo,public.evaluacion,public.metrica,public.medicion FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.nexo_ec_estado(),public.nexo_ec_mutar(text,jsonb),public.nexo_ec_assert_integridad(),public.nexo_ec_comprobar_diferido(),public.nexo_ec_validar_evaluacion(),public.nexo_ec_validar_medicion(),public.nexo_ec_preservar_protocolo(),public.nexo_ec_preservar_metrica() FROM PUBLIC,anon,authenticated;
 
+-- Los mínimos y la coherencia también deben cumplirse en las filas actuales.
+SELECT public.nexo_ec_assert_integridad();
 COMMIT;

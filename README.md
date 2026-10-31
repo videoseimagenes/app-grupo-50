@@ -2,20 +2,23 @@
 
 Registro de evaluaciones físicas y consulta del historial de deportistas.
 
-## Archivos para revisar
+## Modelo y base de datos
 
-- [Modelo E-C definitivo](docs/modelo-er.png).
-- [Revisión del modelo y comparación con Supabase](docs/revision-modelo-ec.md).
-- [Descripción del proyecto y reglas para ChatGPT](CHATGPT.md).
+- [Modelo E-C definitivo](docs/modelo-er.png): seis entidades y 28 atributos propios.
+- [Revisión del modelo](docs/revision-modelo-ec.md).
+- [Proyecto, conexión pública y reglas para ChatGPT](CHATGPT.md).
 - [Instrucciones para ChatGPT/Codex](AGENTS.md).
-- [Propuesta de tablas y reglas](supabase/migraciones/001_tablas.sql).
-- [Propuesta de seguridad](supabase/migraciones/002_seguridad.sql).
+- [001: tablas, reglas y reconocimiento de la estructura existente](supabase/migraciones/001_tablas.sql).
+- [002: RLS y permisos mínimos del servidor](supabase/migraciones/002_seguridad.sql).
 - [Explicación fácil de tablas, claves y permisos](docs/guia-tablas-y-seguridad.md).
-- [Resultado de las 23 comprobaciones en una base aislada](docs/verificacion-sql.md).
+- [Las 30 comprobaciones del SQL](docs/verificacion-sql.md).
+- [Aplicación y comprobación en Supabase](docs/aplicacion-supabase.md).
 
-La propuesta SQL corresponde a la fase 2, paso 1 de la guía. No se ha aplicado
-en Supabase real. El grupo debe revisarla antes de aprobar cualquier cambio.
+**Fase 2, paso 3: aplicado y verificado el 31/10/2026.** Se reutilizó el
+proyecto gratuito existente en Europa. Las migraciones conservaron las seis
+tablas, sus datos y sus reglas, y limitaron al servidor a los permisos que
+necesita. El asesor de seguridad devolvió cero avisos.
 
-La app actual está en una vista previa privada de ChatGPT Sites. Este
-repositorio todavía no contiene toda su implementación ni una publicación en
-Cloudflare Pages. El modelo y las seis tablas son la referencia del proyecto.
+La app continúa en una vista previa privada de ChatGPT Sites. Este repositorio
+contiene el modelo, la documentación y el SQL aplicado; todavía no contiene
+toda la implementación ni una publicación en Cloudflare Pages.

@@ -1,12 +1,10 @@
-# Verificación de la propuesta SQL
+# Verificación del SQL aplicado
 
 Fecha: 31 de octubre de 2026.
 
-Los archivos 001_tablas.sql y 002_seguridad.sql se ejecutaron en una base
-PostgreSQL aislada en memoria mediante PGlite 0.3.14. Para la prueba se crearon
-roles locales anon, authenticated y service_role, sin conexión a Supabase.
-
-Resultado: **23 comprobaciones correctas**.
+Los archivos 001_tablas.sql y 002_seguridad.sql se ejecutaron primero en
+PostgreSQL aislado en memoria mediante PGlite 0.3.14, con roles locales anon,
+authenticated y service_role. Resultado: **30 comprobaciones correctas**.
 
 | Comprobación | Resultado |
 | --- | --- |
@@ -33,16 +31,28 @@ Resultado: **23 comprobaciones correctas**.
 | Denegar SELECT anónimo por permisos | Correcto |
 | RLS oculta filas incluso si se concede SELECT temporalmente | Correcto |
 | El PNG original y sus cardinalidades se conservan | Correcto |
+| Instalación vacía protegida incluso antes de 002 | Correcto |
+| Reaplicar 001 conserva las filas y los objetos existentes | Correcto |
+| Reaplicar 002 conserva políticas y permisos sin duplicarlos | Correcto |
+| 001 rechaza un campo inesperado sin borrar filas ni corregir a ciegas | Correcto |
+| Migración de una base poblada con la estructura anterior | Correcto |
+| Retira TRUNCATE, TRIGGER y REFERENCES y conserva CRUD del servidor | Correcto |
+| Una estructura parcial aborta sin crear ni borrar otras tablas | Correcto |
 
-Estas pruebas comprueban SQL, restricciones y permisos de PostgreSQL. No
-simulan una sesión real de ChatGPT, las conexiones HTTP, Supabase Auth ni un
-despliegue de la aplicación. Tampoco prueban concurrencia entre conexiones.
+Los datos de estas pruebas son ficticios. Se comprobó la instalación vacía,
+la adaptación de una estructura anterior ya poblada y la reaplicación de ambos
+archivos sin perder filas, duplicar políticas ni cambiar los objetos existentes.
+Una estructura parcial o diferente hizo abortar la migración de forma segura.
 
-En Supabase real se consultaron únicamente metadatos de RLS, políticas y
-permisos. No se ejecutaron los archivos propuestos ni se aplicaron cambios.
+Después se aplicaron los archivos adaptados en Supabase real, con aprobación
+para cerrar este paso. Las verificaciones posteriores consultaron metadatos,
+permisos y recuentos. Confirmaron estructura conservada, integridad, acceso
+del servidor, bloqueo del acceso REST anónimo y cero avisos de seguridad.
+Versiones y recuentos: [Informe de aplicación](aplicacion-supabase.md).
 
-El permiso temporal de lectura utilizado para demostrar que RLS oculta filas
-solo se concedió dentro de una transacción de la base aislada y se revirtió.
+La comprobación de RLS con un GRANT temporal solo se hizo en la base aislada
+y se revirtió. No se concedió acceso público temporal en Supabase real.
 
-La propuesta deja pendiente la revisión del grupo y cualquier autorización de
-un cambio concreto en el proyecto real.
+Las pruebas no cubren concurrencia entre conexiones, toda la sesión HTTP de
+ChatGPT, Supabase Auth, Cloudflare ni dispositivos reales. Este cambio modifica
+los permisos de las seis tablas; no despliega una interfaz nueva.

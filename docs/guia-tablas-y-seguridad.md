@@ -1,11 +1,15 @@
 # Tablas, claves y seguridad, explicado fácilmente
 
-## Qué se prepara en este paso
+## Qué está terminado en este paso
 
-Se propone el SQL del modelo de la imagen y su seguridad. No se cambia la base
-de datos real. Los archivos sirven para revisar el diseño y reproducirlo en
-una base vacía autorizada. El proyecto real ya tiene estas tablas, por lo que
-ejecutar allí los mismos CREATE TABLE daría error.
+El SQL y la seguridad del modelo se aprobaron, adaptaron y aplicaron el
+31/10/2026. Como las seis tablas ya existían, el archivo 001 comprobó que
+coincidían y las conservó. El archivo 002 dejó al servidor solo los permisos
+de leer, crear, editar y borrar que necesita la app. Los recuentos no cambiaron.
+
+Los archivos también pueden instalar el modelo en una base vacía autorizada.
+Si encuentran solo algunas tablas o una estructura distinta, se detienen: no
+borran datos ni intentan corregir el proyecto sin una revisión específica.
 
 El SQL usa nombres en español, en minúsculas y sin tildes. Las funciones
 adicionales comprueban reglas; no son más entidades ni más tablas.
@@ -133,11 +137,11 @@ NEXO. El servidor comprueba la identidad de ChatGPT del propietario y se
 comunica con una función acotada de Supabase. No se usa Supabase Auth para
 identificar a ese propietario en el navegador.
 
-| Rol | Permiso propuesto sobre las seis tablas |
+| Rol | Permiso aplicado sobre las seis tablas |
 | --- | --- |
 | anon | Sin acceso directo de lectura o escritura. |
 | authenticated | Sin acceso directo, aunque exista una sesión de Supabase Auth. Esa sesión por sí sola no autoriza datos de NEXO. |
-| service_role | SELECT, INSERT, UPDATE y DELETE desde infraestructura de servidor autorizada. No se le conceden TRUNCATE, TRIGGER ni REFERENCES en esta propuesta. |
+| service_role | SELECT, INSERT, UPDATE y DELETE desde infraestructura de servidor autorizada. No se le conceden TRUNCATE, TRIGGER ni REFERENCES en esta configuración. |
 
 ### Qué permite cada política
 
@@ -154,11 +158,11 @@ Todas tienen el mismo significado:
 Son seis políticas independientes con la misma regla. No autorizan a los
 usuarios del navegador a entrar en las tablas. En una base vacía, el archivo
 001 activa RLS desde el principio para que no exista una ventana de acceso
-abierto antes de revisar el archivo 002.
+abierto antes de aplicar el archivo 002.
 
 El rol técnico service_role puede saltarse RLS. Por eso el control de quién
 puede usar NEXO está en el servidor y sus credenciales no pueden estar en
-HTML, JavaScript del navegador, documentos ni GitHub. Esta preparación no
+HTML, JavaScript del navegador, documentos ni GitHub. Este cierre no
 obtiene ni utiliza ninguna secret key.
 
 Si se cambia a la ruta de la guía de una web estática con acceso directo a
@@ -166,26 +170,31 @@ Supabase, estas políticas no permitirán consultar ni guardar desde ella. Antes
 habrá que diseñar y aprobar la autenticación y los permisos correspondientes;
 no se resuelve dando permiso a todo el mundo.
 
-## Qué coincide con la base actual y qué se propone
+## Qué coincide con la base actual y qué cambió
 
-La consulta de solo lectura del 31 de octubre de 2026 confirmó RLS activo y
-una política ec_solo_servidor para anon y authenticated en las seis tablas.
+La comparación del 31/10/2026 confirmó que coincidían los 34 campos, las
+36 restricciones de PostgreSQL, los 12 índices, las ocho funciones, los nueve
+triggers y las seis políticas. Son objetos técnicos; no son más entidades.
 
-La propuesta conserva ese comportamiento. Limita los permisos explícitos del
-rol técnico a las cuatro operaciones que necesita la app; en el proyecto
-actual ese rol tiene también permisos de administración de tabla. Ningún
-cambio de permisos de esta propuesta se ha aplicado allí.
+La migración 001 reconoció esa estructura. La 002 retiró del rol técnico
+TRUNCATE, TRIGGER y REFERENCES: son permisos de vaciar o administrar tablas
+que el servidor no necesita. Conservó SELECT, INSERT, UPDATE y DELETE.
+Los roles anon y authenticated siguen sin acceso directo.
 
-Los archivos no incluyen datos reales ni reproducen el catálogo documental
-conservado de la aplicación anterior. Tampoco despliegan la función del
-servidor ni publican una app: corresponden a la preparación del modelo y del SQL.
+Se comprobaron los recuentos antes y después, sin extraer filas ni huellas de
+su contenido. El catálogo documental conserva sus 320 fichas y la
+infraestructura privada se mantiene. El asesor de seguridad muestra cero avisos.
 
-## Qué tiene que revisar el grupo ahora
+## Qué tiene que poder explicar el grupo
 
-Cada integrante debe poder explicar las seis claves ajenas, los puntos
-obligatorios, las reglas de borrado y los permisos anteriores. Después se
-decidirá si hace falta algún cambio real. Como las tablas ya existen y están
-alineadas, no se ejecutan estos archivos de creación sobre ellas.
+Cada integrante debe entender las seis claves ajenas, los puntos obligatorios,
+las reglas de borrado y los permisos anteriores. La aplicación técnica de los
+SQL no sustituye vuestra comprensión. Podéis practicar con un deportista,
+una prueba, un protocolo, una métrica, una evaluación y dos intentos.
+
+El informe de cierre está en [Aplicación en Supabase](aplicacion-supabase.md).
+La app continúa en su vista previa privada de ChatGPT Sites. Este paso no
+cambia su publicación ni habilita el acceso directo desde una web estática.
 
 ## Documentación técnica consultada
 

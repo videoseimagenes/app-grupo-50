@@ -63,8 +63,10 @@ la clave ajena de MEDICION. La base de datos dispone de comprobaciones
 adicionales para esos mínimos. La pertenencia de la métrica al protocolo de
 la evaluación también es una regla adicional al dibujo.
 
-La revisión no requiere una migración nueva: las tablas reales ya están
-alineadas con esta versión del modelo.
+La revisión de la imagen no exigía cambiar las tablas: ya estaban alineadas.
+Posteriormente se adaptaron y aplicaron 001 y 002 para reconocer esa misma
+estructura y limitar los permisos del servidor, sin modificar el modelo ni
+los datos. El cierre está en [Aplicación en Supabase](aplicacion-supabase.md).
 
 ## Identificación del archivo
 

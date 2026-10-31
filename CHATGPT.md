@@ -59,17 +59,25 @@ Un formulario vacío es un borrador en pantalla. La evaluación se guarda junto
 con su primera medición. Los protocolos utilizados conservan sus instrucciones
 y métricas; un cambio de procedimiento requiere otra versión.
 
-## Preparación de la fase 2, paso 1
+## Fase 2: SQL preparado, aprobado y aplicado
 
-- `supabase/migraciones/001_tablas.sql`: propuesta del esquema, restricciones,
-  validaciones y operaciones conjuntas de las seis tablas.
-- `supabase/migraciones/002_seguridad.sql`: RLS y permisos del acceso por servidor.
+- `supabase/migraciones/001_tablas.sql`: esquema, restricciones, validaciones
+  y operaciones conjuntas. Si las tablas ya existen, verifica su estructura
+  completa y las conserva; una estructura parcial o diferente hace abortar.
+- `supabase/migraciones/002_seguridad.sql`: RLS y permisos del servidor,
+  compatible con las seis políticas existentes y sin duplicarlas.
 - `docs/guia-tablas-y-seguridad.md`: explicación para revisar las decisiones.
 
-Estos archivos no se han ejecutado en el proyecto real. Son una referencia
-para una base vacía: en el proyecto actual las tablas ya existen. No constituyen
-una migración que se pueda aplicar directamente sobre ellas. Si se aprueba un
-cambio real, se preparará una migración específica que conserve los datos.
+Las dos migraciones adaptadas se aplicaron y verificaron el 31/10/2026 en el
+proyecto existente. El esquema ya coincidía: se conservaron tablas, datos,
+restricciones, índices, funciones y triggers. El ajuste efectivo fue limitar
+los permisos explícitos del servidor a SELECT, INSERT, UPDATE y DELETE.
+Los recuentos de las once tablas del proyecto se mantuvieron.
+
+La verificación aislada pasó 30 comprobaciones; el asesor de seguridad de
+Supabase devolvió cero avisos. El informe con las versiones aplicadas está en
+`docs/aplicacion-supabase.md`. Cualquier cambio futuro necesita su propia
+aprobación; este cierre no autoriza cambios adicionales.
 
 El catálogo documental y otras funciones antiguas de la app están fuera de las
 seis entidades de evaluación; no se copian sus datos ni se recrea esa
@@ -88,6 +96,23 @@ infraestructura en estos dos archivos.
 La infraestructura existente utiliza internamente el rol técnico `service_role`
 en una función del servidor de Supabase. Ese rol puede saltarse RLS: la
 autorización del propietario se comprueba antes, en el servidor. Esta
-preparación SQL no obtiene ni utiliza una clave de ese rol. Ese funcionamiento
+aplicación de las migraciones no obtiene ni utiliza una clave de ese rol. Ese funcionamiento
 debe explicarse como una diferencia respecto a una página que acceda
 directamente desde el navegador con una clave pública.
+
+## Conexión pública de Supabase
+
+Se reutiliza el proyecto **NEXO Performance**, ID `wkgatoyuddpmvsjrugor`, de la
+organización existente **Pablo Martínez Ferro**. Está en la región europea
+`eu-west-3` y el plan es **Free**. No se creó otro proyecto ni se contrató
+un plan de pago. Se conserva su nombre para mantener la app actual conectada.
+
+- Project URL: `https://wkgatoyuddpmvsjrugor.supabase.co`.
+- Publishable key activa: `sb_publishable_m-aFeMCCQFRmJRpk-cHlyw_Q5hINc6n`.
+
+Esta clave publicable identifica el proyecto y puede estar en documentación
+o código de navegador. No es una contraseña ni permite acceder a las seis
+tablas con sus permisos actuales. Una petición de prueba sin usuario obtuvo
+HTTP 401 / PostgreSQL 42501, como corresponde al acceso directo denegado.
+La app sigue utilizando su servidor privado; anotar estos datos no cambia
+su autenticación ni publica una versión en Cloudflare.
